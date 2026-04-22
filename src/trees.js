@@ -4,9 +4,10 @@ import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 import { LOD } from 'three';
 
 export default class Tree {
-    constructor(scene, terrain) { 
+    constructor(scene, terrain, water) { 
         this.scene = scene;
         this.terrain = terrain; 
+        this.water = water;
         const dracoLoader = new DRACOLoader();
         dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.6/');
         this.loader = new GLTFLoader();
@@ -14,41 +15,56 @@ export default class Tree {
         this.loadTree();
     }
 
-    loadTree() {
-        this.loader.load('/tree.glb', (gltf) => {
-            const treeModel = gltf.scene;
+loadTree() {
+    this.loader.load('/tree.glb', (gltf) => {
+        const treeModel = gltf.scene;
+        const COUNT = 400;
+        const SIZE = 200;
+        const placedPositions = [];
+        let placed = 0;
+        let attempts = 0;
 
-            const COUNT = 400;
-            const SIZE = 200;
+        while (placed < COUNT && attempts < COUNT * 20) {
+            attempts++;
+            const x = (Math.random() - 0.5) * SIZE;
+            const z = (Math.random() - 0.5) * SIZE;
 
-            for (let i = 0; i < COUNT; i++) {
-                const x = (Math.random() - 0.5) * SIZE;
-                const z = (Math.random() - 0.5) * SIZE;
-                const y = this.terrain.getHeightAt(x, z) - 0.06; 
+            const dx = x - this.water.waterX;
+            const dz = z - this.water.waterZ;
+            if (Math.sqrt(dx * dx + dz * dz) < this.water.waterRadius + 3) continue;
 
-                const lod = new LOD();
-
-                const highDetail = treeModel.clone(true);
-                highDetail.position.y = -0.5;
-                highDetail.traverse((child) => {
-                    if (child.isMesh) {
-                        child.material.color.set(0x2d5a1b);
-                    }
-                });
-
-                lod.addLevel(highDetail, 0);
-                lod.addLevel(this.createImpostor(), 80);
-                lod.addLevel(new THREE.Object3D(), 90);
-
-                const scale = 0.8 + Math.random() * 0.4;
-                lod.position.set(x, y, z);
-                lod.scale.set(scale, scale, scale);
-                lod.rotation.y = Math.random() * Math.PI * 2;
-
-                this.scene.add(lod);
+            let tooClose = false;
+            for (const pos of placedPositions) {
+                const ddx = x - pos.x;
+                const ddz = z - pos.z;
+                if (Math.sqrt(ddx * ddx + ddz * ddz) < 5) { tooClose = true; break; }
             }
-        });
-    }
+            if (tooClose) continue;
+
+            const y = this.terrain.getHeightAt(x, z) - 0.06;
+            const lod = new LOD();
+
+            const highDetail = treeModel.clone(true);
+            highDetail.position.y = -0.5;
+            highDetail.traverse((child) => {
+                if (child.isMesh) child.material.color.set(0x2d5a1b);
+            });
+
+            lod.addLevel(highDetail, 0);
+            lod.addLevel(this.createImpostor(), 70);
+            lod.addLevel(new THREE.Object3D(), 90);
+
+            const scale = 0.8 + Math.random() * 0.4;
+            lod.position.set(x, y, z);
+            lod.scale.set(scale, scale, scale);
+            lod.rotation.y = Math.random() * Math.PI * 2;
+
+            this.scene.add(lod);
+            placedPositions.push({ x, z });
+            placed++;
+        }
+    });
+}
 
     createImpostor() {
         const loader = new THREE.TextureLoader();
