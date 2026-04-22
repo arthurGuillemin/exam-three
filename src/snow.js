@@ -53,7 +53,7 @@ export default class Snow {
 
         const material = new THREE.PointsMaterial({
             color: 0xffffff,
-            size: 0.8,
+            size: 0.3,
             map: texture,
             transparent: true,
             opacity: 0.8,

@@ -16,7 +16,7 @@ export default class Tree {
         this.loader.setDRACOLoader(dracoLoader);
 
         const texLoader = new THREE.TextureLoader();
-        this.colorMap = texLoader.load('/textures/trees/color.jpg');
+        this.colorMap = texLoader.load('/textures/trees/color.png');
         this.colorMap.minFilter = THREE.LinearMipMapLinearFilter;
         this.colorMap.colorSpace = THREE.SRGBColorSpace; 
         this.colorMap.flipY = false; 
@@ -35,7 +35,7 @@ export default class Tree {
     loadTree() {
         this.loader.load('/tree.glb', (gltf) => {
             const treeModel = gltf.scene;
-            const COUNT = 400;
+            const COUNT = 600;
             const SIZE = 200;
             const placedPositions = [];
             let placed = 0;
@@ -76,15 +76,14 @@ export default class Tree {
                             normalMap: this.normalMap,
                             roughnessMap: this.rmaoMap,
                             aoMap: this.rmaoMap,
-                            alphaTest: 0.9,
+                            alphaTest: 0.2,
                         });
                     }
                 });
 
                 lod.addLevel(highDetail, 0);
-                lod.addLevel(this.createImpostor(), 70);
-                lod.addLevel(new THREE.Object3D(), 90);
-
+                lod.addLevel(this.createImpostor(), 90);
+                lod.addLevel(new THREE.Object3D(), 110);
                 const scale = 0.8 + Math.random() * 0.4;
                 lod.position.set(x, y, z);
                 lod.scale.set(scale, scale, scale);
