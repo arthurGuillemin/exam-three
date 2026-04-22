@@ -2,10 +2,10 @@ import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 
 export default class Terrain {
-    constructor(scene) {
+    constructor(scene, water) { 
         this.scene = scene;
+        this.water = water; 
         this.createGround();
-        this.createGrass();
     }
     
     createGround() {
@@ -27,11 +27,12 @@ export default class Terrain {
         });
 
         const position = geometry.attributes.position;
+        this.positionArray = position.array;
 
         for (let i = 0; i < position.count; i++) {
             const x = position.getX(i);
             const y = position.getY(i);
-            const z = Math.sin(x * 0.1) * Math.cos(y * 0.1) * 5;
+            const z = Math.sin(x * 0.05) * Math.cos(y * 0.05) * 8;
             position.setZ(i, z);
         }
 
@@ -41,10 +42,11 @@ export default class Terrain {
         this.ground = new THREE.Mesh(geometry, material);
         this.ground.rotation.x = -Math.PI / 2;
         this.scene.add(this.ground);
+        this.groundGeometry = geometry;
     }
 
     getHeightAt(x, z) {
-        return Math.sin(x * 0.1) * Math.cos(z * 0.1) * 5;
+        return Math.sin(x * 0.05) * Math.cos(z * 0.05) * 8;
     }
 
     createGrass() {
@@ -65,29 +67,39 @@ export default class Terrain {
         plane2.applyMatrix4(new THREE.Matrix4().makeRotationY(Math.PI / 3));
         plane3.applyMatrix4(new THREE.Matrix4().makeRotationY((Math.PI * 2) / 3));
 
-        const grassGeometry = mergeGeometries([plane1, plane2, plane3]); 
+        const grassGeometry = mergeGeometries([plane1, plane2, plane3]);
 
         const COUNT = 30000;
         const instancedMesh = new THREE.InstancedMesh(grassGeometry, grassMaterial, COUNT);
         instancedMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
 
         const dummy = new THREE.Object3D();
+        let placed = 0;
+        let attempts = 0;
 
-        for (let i = 0; i < COUNT; i++) {
+        while (placed < COUNT && attempts < COUNT * 3) {
+            attempts++;
             const x = (Math.random() - 0.5) * 180;
             const z = (Math.random() - 0.5) * 180;
-            const y = this.getHeightAt(x, z);
 
+            if (this.water) {
+                const dx = x - this.water.waterX;
+                const dz = z - this.water.waterZ;
+                if (Math.sqrt(dx * dx + dz * dz) < this.water.waterRadius + 1) continue;
+            }
+
+            const y = this.getHeightAt(x, z);
             dummy.position.set(x, y, z);
             dummy.rotation.y = Math.random() * Math.PI * 2;
 
             const scale = 0.4 + Math.random() * 0.4;
             dummy.scale.set(scale, scale, scale);
-
             dummy.updateMatrix();
-            instancedMesh.setMatrixAt(i, dummy.matrix);
+            instancedMesh.setMatrixAt(placed, dummy.matrix);
+            placed++;
         }
 
+        instancedMesh.count = placed;
         instancedMesh.instanceMatrix.needsUpdate = true;
         this.scene.add(instancedMesh);
     }

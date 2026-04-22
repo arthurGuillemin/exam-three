@@ -13,6 +13,7 @@ import Tree from './trees.js';
 import Water from './water.js';
 import Snow from './snow.js';
 import Fisherman from './fishermen.js';
+import Cabin from './Cabin.js';
 
 class App {
     constructor() {   
@@ -29,21 +30,22 @@ class App {
         this.lightsManager = new LightsManager(this.scene);
         this.terrain = new Terrain(this.scene);
         this.water = new Water(this.scene, this.terrain);
-        this.fisherman = new Fisherman(this.scene, this.water);
-        this.bush = new Bush(this.scene, this.terrain, this.water);
-        this.tree = new Tree(this.scene, this.terrain, this.water);
+        this.terrain.water = this.water; 
+        this.terrain.createGrass();            
+        this.cabin = new Cabin(this.scene, this.water, this.terrain);        
+        this.fisherman = new Fisherman(this.scene, this.water, this.cabin);   
+        this.bush = new Bush(this.scene, this.terrain, this.water, this.cabin);
+        this.tree = new Tree(this.scene, this.terrain, this.water, this.cabin);
         this.snow= new Snow(this.scene)
         this.orbitControls = new OrbitControlsManager(this.camera, this.renderer);
-
         this.composer = new EffectComposer(this.renderer);
         this.composer.addPass(new RenderPass(this.scene, this.camera));
         this.composer.addPass(new UnrealBloomPass(
             new THREE.Vector2(window.innerWidth, window.innerHeight),
-            0.4,
-            0.8,
-            0.85
+            0.08,  
+            0.2,    
+            0.9    
         ));
-        
         window.addEventListener('resize', () => this.onResize());
         this.animate();
     }

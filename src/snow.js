@@ -41,8 +41,7 @@ export default class Snow {
             positions[i * 3]     = (Math.random() - 0.5) * 200;
             positions[i * 3 + 1] = Math.random() * 80;
             positions[i * 3 + 2] = (Math.random() - 0.5) * 200;
-
-            velocities[i] = 0.02 + Math.random() * 0.05;
+            velocities[i] = 0.02 + Math.random() * 0.01;
         }
 
         geometry.setAttribute(
