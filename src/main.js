@@ -11,6 +11,8 @@ import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import Tree from './trees.js';
 import Water from './water.js';
+import Snow from './snow.js';
+import Fisherman from './fishermen.js';
 
 class App {
     constructor() {   
@@ -26,9 +28,11 @@ class App {
         
         this.lightsManager = new LightsManager(this.scene);
         this.terrain = new Terrain(this.scene);
-        this.bush = new Bush(this.scene, this.terrain);
-        this.tree = new Tree(this.scene , this.terrain);
-        this.water = new Water(this.scene , this.terrain)
+        this.water = new Water(this.scene, this.terrain);
+        this.fisherman = new Fisherman(this.scene, this.water);
+        this.bush = new Bush(this.scene, this.terrain, this.water);
+        this.tree = new Tree(this.scene, this.terrain, this.water);
+        this.snow= new Snow(this.scene)
         this.orbitControls = new OrbitControlsManager(this.camera, this.renderer);
 
         this.composer = new EffectComposer(this.renderer);
@@ -50,11 +54,14 @@ class App {
         this.composer.setSize(window.innerWidth, window.innerHeight); 
     }
     
-    animate() {
-        requestAnimationFrame(() => this.animate());
-        this.water.update();
-        this.composer.render(); 
-    }
+animate() {
+    requestAnimationFrame(() => this.animate());
+    const delta = this.rendererManager.clock.getDelta();
+    this.water.update(this.camera);
+    this.snow.update();
+    this.fisherman.update(delta); 
+    this.composer.render();
+}
 }
 
 new App();
