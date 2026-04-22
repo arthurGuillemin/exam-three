@@ -1,0 +1,17 @@
+{
+  "name": "threejs-exam",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "rendu pour l'exam three.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "three": "^0.170.0"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0"
+  }
+}
