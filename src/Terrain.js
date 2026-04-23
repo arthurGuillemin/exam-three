@@ -24,6 +24,7 @@ export default class Terrain {
             map: colorMap,
             normalMap: normalMap,
             roughnessMap: roughnessMap,
+            color: new THREE.Color(2.2, 2.3, 2.5), // la texture de neige fait trop gris cendre je trouve 
         });
 
         const position = geometry.attributes.position;
@@ -69,7 +70,7 @@ export default class Terrain {
 
         const grassGeometry = mergeGeometries([plane1, plane2, plane3]);
 
-        const COUNT = 30000;
+        const COUNT = 50000;
         const instancedMesh = new THREE.InstancedMesh(grassGeometry, grassMaterial, COUNT);
         instancedMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
 

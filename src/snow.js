@@ -4,26 +4,49 @@ function createSnowTexture() {
     const canvas = document.createElement('canvas');
     canvas.width = 64;
     canvas.height = 64;
-
     const ctx = canvas.getContext('2d');
+    const cx = 32, cy = 32, r = 28;
 
-    const gradient = ctx.createRadialGradient(
-        32, 32, 0,
-        32, 32, 32
-    );
+    ctx.clearRect(0, 0, 64, 64);
+    ctx.strokeStyle = 'rgba(255,255,255,1)';
+    ctx.lineWidth = 1.5;
+    ctx.lineCap = 'round';
 
-    gradient.addColorStop(0, 'rgba(255,255,255,1)');
-    gradient.addColorStop(0.2, 'rgba(255,255,255,1)');
-    gradient.addColorStop(1, 'rgba(255,255,255,0)');
+    for (let i = 0; i < 6; i++) {
+        const angle = (i / 6) * Math.PI * 2;
+        const ex = cx + Math.cos(angle) * r;
+        const ey = cy + Math.sin(angle) * r;
 
-    ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(ex, ey);
+        ctx.stroke();
+
+        for (let t = 0.3; t <= 0.7; t += 0.2) {
+            const bx = cx + Math.cos(angle) * r * t;
+            const by = cy + Math.sin(angle) * r * t;
+            const branchLen = r * 0.25;
+
+            [-1, 1].forEach(side => {
+                const ba = angle + side * Math.PI / 3;
+                ctx.beginPath();
+                ctx.moveTo(bx, by);
+                ctx.lineTo(
+                    bx + Math.cos(ba) * branchLen,
+                    by + Math.sin(ba) * branchLen
+                );
+                ctx.stroke();
+            });
+        }
+    }
+
     ctx.beginPath();
-    ctx.arc(32, 32, 32, 0, Math.PI * 2);
+    ctx.arc(cx, cy, 2, 0, Math.PI * 2);
+    ctx.fillStyle = 'white';
     ctx.fill();
 
     return new THREE.CanvasTexture(canvas);
 }
-
 export default class Snow {
     constructor(scene) {
         this.scene = scene;
@@ -31,7 +54,7 @@ export default class Snow {
     }
 
     createSnow() {
-        const COUNT = 30000;
+        const COUNT = 50000;
 
         const geometry = new THREE.BufferGeometry();
         const positions = new Float32Array(COUNT * 3);
@@ -53,14 +76,13 @@ export default class Snow {
 
         const material = new THREE.PointsMaterial({
             color: 0xffffff,
-            size: 0.3,
+            size: 0.2,       
             map: texture,
             transparent: true,
-            opacity: 0.8,
+            opacity: 0.9,
             depthWrite: false,
-            blending: THREE.AdditiveBlending,
+            blending: THREE.NormalBlending,
         });
-
         this.particles = new THREE.Points(geometry, material);
         this.velocities = velocities;
 

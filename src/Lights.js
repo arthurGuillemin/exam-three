@@ -4,10 +4,11 @@ export default class LightsManager {
     constructor(scene) {
         this.scene = scene;
 
-        this.ambientLight = new THREE.AmbientLight(0xc8d8f0, 0.5);
+        this.ambientLight = new THREE.AmbientLight(0xd0e8ff, 0.8);
+
         this.scene.add(this.ambientLight);
 
-        this.directionalLight = new THREE.DirectionalLight(0xfff4e0, 1.2);
+        this.directionalLight = new THREE.DirectionalLight(0xfff8f0, 1.0);
         this.directionalLight.position.set(30, 25, 20);
         this.directionalLight.castShadow = true;
 
@@ -25,7 +26,8 @@ export default class LightsManager {
 
         this.scene.add(this.directionalLight);
 
-        this.fillLight = new THREE.DirectionalLight(0x8ab4d4, 0.3);
+        this.fillLight = new THREE.DirectionalLight(0xa0c8e8, 0.4);
+
         this.fillLight.position.set(-20, 30, -20);
         this.scene.add(this.fillLight);
 

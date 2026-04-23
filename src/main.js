@@ -69,7 +69,7 @@ class App {
                 uTime:             { value: 0 },
                 uExposure:         { value: 1.20 },   
                 uContrast:         { value: 0.8},  
-                uSaturation:       { value: 2.5 },   
+                uSaturation:       { value: 1.8 },   
                 uVignetteStrength: { value: 0.10 },
                 uVignetteRadius:   { value: 0.75 },
                 uGrainStrength:    { value: 0.025 },
@@ -150,7 +150,6 @@ class App {
         this.water.update(this.camera);
         this.snow.update();
         this.fisherman.update(delta);
-
         if (this.colorGradePass) {
             this.colorGradePass.uniforms.uTime.value += delta;
         }
