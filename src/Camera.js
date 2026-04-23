@@ -9,9 +9,10 @@ export default class CameraManager {
             0.1,                                   
             1000                                   
         );
+        window.camera = this.camera;
         
-        this.camera.position.set(0, 10, 20);
-        this.camera.lookAt(0, 0, 0);        
+        this.camera.position.set(-52, -0.6, 22);
+        this.camera.lookAt(-55, 0, 0);        
     }
     
     //resize de le fenetre 

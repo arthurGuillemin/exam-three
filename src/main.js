@@ -5,19 +5,18 @@ import RendererManager from './Renderer.js';
 import LightsManager from './Lights.js';
 import Terrain from './Terrain.js';
 import OrbitControlsManager from './OrbitControls.js';
-import Bush from './bush';
+import Bush from './bush.js';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { SMAAPass } from 'three/addons/postprocessing/SMAAPass.js';
-import { GTAOPass } from 'three/addons/postprocessing/GTAOPass.js';
-import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import Tree from './trees.js';
 import Water from './water.js';
 import Snow from './snow.js';
 import Fisherman from './fishermen.js';
 import Cabin from './Cabin.js';
+import Stats from 'stats.js';
 
 class App {
     constructor() {
@@ -43,7 +42,20 @@ class App {
         this.snow = new Snow(this.scene);
         this.orbitControls = new OrbitControlsManager(this.camera, this.renderer);
 
+        // stats
+        this.stats = new Stats();
+        this.stats.showPanel(0);
+        document.body.appendChild(this.stats.dom);
         this.setupPostProcessing();
+        this.frameCount = 0;
+        setInterval(() => {
+            console.log('GPU INFO:', {
+                drawCalls: this.renderer.info.render.calls,
+                triangles: this.renderer.info.render.triangles,
+                geometries: this.renderer.info.memory.geometries,
+                textures: this.renderer.info.memory.textures,
+            });
+        }, 2000);
 
         window.addEventListener('resize', () => this.onResize());
         this.animate();
@@ -145,16 +157,35 @@ class App {
 
     animate() {
         requestAnimationFrame(() => this.animate());
+        this.stats.begin(); 
+        const start = performance.now();
         const delta = this.rendererManager.clock.getDelta();
-
+        const t1 = performance.now();
         this.water.update(this.camera);
+        const t2 = performance.now();
         this.snow.update();
+        const t3 = performance.now();
         this.fisherman.update(delta);
+        const t4 = performance.now();
         if (this.colorGradePass) {
             this.colorGradePass.uniforms.uTime.value += delta;
         }
-
+        const t5 = performance.now();
         this.composer.render();
+        const end = performance.now();
+        this.frameCount++;
+        if (this.frameCount % 60 === 0) {
+            console.log('PERF:', {
+                water: (t2 - t1).toFixed(2),
+                snow: (t3 - t2).toFixed(2),
+                fisherman: (t4 - t3).toFixed(2),
+                post: (t5 - t4).toFixed(2),
+                render: (end - t5).toFixed(2),
+                total: (end - start).toFixed(2),
+            });
+        }
+
+        this.stats.end();
     }
 }
 

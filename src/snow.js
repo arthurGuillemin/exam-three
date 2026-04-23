@@ -59,12 +59,22 @@ export default class Snow {
         const geometry = new THREE.BufferGeometry();
         const positions = new Float32Array(COUNT * 3);
         const velocities = new Float32Array(COUNT);
+        const directions = new Float32Array(COUNT * 2);
 
         for (let i = 0; i < COUNT; i++) {
-            positions[i * 3]     = (Math.random() - 0.5) * 200;
-            positions[i * 3 + 1] = Math.random() * 80;
-            positions[i * 3 + 2] = (Math.random() - 0.5) * 200;
+            const i3 = i * 3;
+            const i2 = i * 2;
+
+
+            positions[i3]     = (Math.random() - 0.5) * 200;
+            positions[i3 + 1] = Math.random() * 80;
+            positions[i3 + 2] = (Math.random() - 0.5) * 200;
+
             velocities[i] = 0.02 + Math.random() * 0.01;
+
+            const angle = Math.random() * Math.PI * 2;
+            directions[i2]     = Math.cos(angle);
+            directions[i2 + 1] = Math.sin(angle);
         }
 
         geometry.setAttribute(
@@ -76,33 +86,41 @@ export default class Snow {
 
         const material = new THREE.PointsMaterial({
             color: 0xffffff,
-            size: 0.2,       
+            size: 0.2,
             map: texture,
             transparent: true,
             opacity: 0.9,
             depthWrite: false,
             blending: THREE.NormalBlending,
         });
+
         this.particles = new THREE.Points(geometry, material);
         this.velocities = velocities;
+        this.directions = directions;
 
         this.scene.add(this.particles);
     }
 
     update() {
         const positions = this.particles.geometry.attributes.position.array;
+        const velocities = this.velocities;
+        const directions = this.directions;
+
         const COUNT = positions.length / 3;
 
         for (let i = 0; i < COUNT; i++) {
-            positions[i * 3 + 1] -= this.velocities[i];
+            const i3 = i * 3;
+            const i2 = i * 2;
 
-            positions[i * 3]     += Math.sin(Date.now() * 0.001 + i) * 0.01;
-            positions[i * 3 + 2] += Math.cos(Date.now() * 0.001 + i) * 0.01;
+            positions[i3 + 1] -= velocities[i];
 
-            if (positions[i * 3 + 1] < -5) {
-                positions[i * 3]     = (Math.random() - 0.5) * 200;
-                positions[i * 3 + 1] = 80;
-                positions[i * 3 + 2] = (Math.random() - 0.5) * 200;
+            positions[i3]     += directions[i2] * 0.01;
+            positions[i3 + 2] += directions[i2 + 1] * 0.01;
+
+            if (positions[i3 + 1] < -5) {
+                positions[i3]     = (Math.random() - 0.5) * 200;
+                positions[i3 + 1] = 80;
+                positions[i3 + 2] = (Math.random() - 0.5) * 200;
             }
         }
 
