@@ -91,7 +91,7 @@ export default class Snow {
             transparent: true,
             opacity: 0.9,
             depthWrite: false,
-            blending: THREE.NormalBlending,
+            blending: THREE.AdditiveBlending,
         });
 
         this.particles = new THREE.Points(geometry, material);
